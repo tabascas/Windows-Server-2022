@@ -1,0 +1,14 @@
+Konsole CMD => mmc => Konsole AD
+
+Konsole CMD => regsvr32.exe schmmgmt.dll
+
+Konsole AD => Datei => Snap-In hinzufügen/entfernen => Scgema hinzufügen
+
+Chema => AD DC ändern => Zielserver => Ok
+
+Beim Fehler => CMD => repadmin /syncall /AeD AD aktualisieren
+
+Betriebmaster => Ändern
+
+
+
