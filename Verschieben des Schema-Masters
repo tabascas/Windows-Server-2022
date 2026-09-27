@@ -10,5 +10,8 @@ Beim Fehler => CMD => repadmin /syncall /AeD AD aktualisieren
 
 Betriebmaster => Ändern
 
+Schema“ wieder auszublenden 
+
+CMD => regsvr32.exe schmmgmt.dll -u
 
 
