@@ -1,3 +1,4 @@
 repadmin /showrepl
 repadmin /syncall
 repadmin /replsummary
+DCDIAG
