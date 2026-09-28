@@ -1,3 +1,9 @@
+
+netdom query fsmo
+
+
+Shema Master
+
 Konsole CMD => mmc => Konsole AD
 
 Konsole CMD => regsvr32.exe schmmgmt.dll
@@ -15,3 +21,8 @@ Schema“ wieder auszublenden
 CMD => regsvr32.exe schmmgmt.dll -u
 
 
+DomainNamingMaster
+Move-ADDirectoryServerOperationMasterRole -Identity SERVER3
+-OperationMasterRole DomainNamingMaster -Confirm:$false
+
+Get-ADForest
