@@ -1,0 +1,41 @@
+Einzeiler
+
+New-ADUser -Name "Theo Retisch" -DisplayName "Theo Retisch" -Surname
+Retisch -GivenName Theo -UserPrincipalName tr@gfnlab.test -
+SamAccountName tr -Enabled 1 -AccountPassword (ConvertTo-SecureString -
+AsPlainText 'Kennw0rt!' -Force) -Path "OU=Arbeit,DC=gfnlab,DC=test" -
+ChangePasswordAtLogon 0
+
+
+Mehrzeiler mittels „
+
+New-ADUser
+-Name "Justin Time" `
+-DisplayName "Justin Time" `
+-Surname Time `
+-GivenName Justin `
+-UserPrincipalName jt@gfnlab.test `
+-SamAccountName jt `
+-Enabled 1 `
+-AccountPassword `
+(ConvertTo-SecureString -AsPlainText ‘Kennw0rt!’-Force) `
+-Path "OU=Arbeit,DC=gfnlab,DC=test" `
+-ChangePasswordAtLogon 0
+
+
+Splatting-Methode
+
+$benutzerParameter = @{
+Name = "Cory Ander"
+DisplayName = "Cory Ander"
+Surname = "Cory"
+GivenName =
+"Ander"
+UserPrincipalName = "ca@gfnlab.test"
+SamAccountName = "ca"
+Enabled = 1
+AccountPassword = (ConvertTo-SecureString -AsPlainText 'Kennw0rt!' -
+Force)
+Path = "OU=Arbeit,DC=gfnlab,DC=test"
+ChangePasswordAtLogon = 0 }
+New-ADUser @benutzerParameter
