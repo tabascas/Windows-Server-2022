@@ -1,0 +1,17 @@
+DFS über die PowerShell
+o Namensräume verwalten:
+• Get-DfsnRoot: Zeigt alle konfigurierten DFS-Namensräume an.
+• New-DfsnRoot: Erstellt einen neuen Namespace (Parameter -Type für Standalone oder DomainV2 nutzen).
+• Set-DfsnRoot: Ändert Einstellungen wie die Zugriffsbasierte Aufzählung (-EnableAccessBasedEnumeration $true). o Ordner und Ziele Verwalten:
+• New-DfsnFolder: Erstellt einen neuen logischen Ordner im Namespace.
+• New-DfsnFolderTarget: Verknüpft einen DFS-Ordner mit einer tatsächlichen Netzwerkfreigabe (Ziel).
+• Get-DfsnFolderTarget: Zeigt den Status (Online/Offline) und die Priorität der Zielserver an.
+
+DFS über die Befehlszeile
+o Client Diagnose und Cache:
+• dfsutil cache referral: Zeigt die aktuell im Client-Cache gespeicherten Verweise an.
+• dfsutil cache referral flush: Leert den Referral-Cache des Clients, um eine neue Zielabfrage zu erzwingen.
+• dfsutil /pktinfo: Zeigt detaillierte Informationen über die aktiven Verbindungen zu DFS-Zielen.
+o Server Abfragen:
+• dfsutil domain <Domänenname>: Listet alle domänenbasierten Namespaces einer Domäne auf.
+• dfsutil root \\<Pfad>\Namespace: Zeigt die Konfiguration und alle Links eines spezifischen Roots an.
