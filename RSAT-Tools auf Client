@@ -1,0 +1,6 @@
+Add-WindowsCapability `
+-online -Name „Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0“
+
+mmc in cmd
+Snap-In hinzufügen/entfernen
+ „Active Directory-Benutzer und -Computer“
