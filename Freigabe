@@ -1,0 +1,12 @@
+Cmdlet                      Bedeutung
+
+Get-SmbShare                Anzeigen der Freigaben
+
+New-SmbShare                Erstellen der Freigabe
+Parameter:
+FullAccess
+NoAccess
+ReadAccess
+…ChangeAccess
+
+Remove-SmbShare             Freigabe aufheben
