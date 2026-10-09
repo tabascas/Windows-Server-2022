@@ -1,0 +1,1 @@
+TestSRTopology SourceComputerName FS01 SourceVolumeName S: SourceLogVolumeName L: DestinationComputerName FS02 –DestinationVolumeName S: DestinationLogVolumeName L: DurationInMinutes 10 ResultPath C:\SR_TEST\
