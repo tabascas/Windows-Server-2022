@@ -1,0 +1,75 @@
+Untergeordnete Domäne
+
+# Klartext-Passwort verschlüsselt speichern
+$AdminPwd = ConvertTo-SecureString "Kennw0rt!" -AsPlainText -Force
+# Anmeldekonto definieren
+$LocalAdmin = ".\administrator"
+# Definition des Objekttyps "PSCredential"
+$ObjectTypPSCredential =
+"System.Management.Automation.PSCredential"
+# Anmeldeinformationen erstellen (PSCredential-Objekt)
+$LocalAdminCred = New-Object $ObjectTypPSCredential ($LocalAdmin, $AdminPwd)
+# Installation der Rolle ADDS
+Install-WindowsFeature -Name "AD-Domain-Services" `
+-IncludeManagementTools `
+-Credential $LocalAdminCred
+# Festlegen des DSRM-Kennworts
+$dsrmPW = ConvertTo-SecureString 'Kennw0rt!' -AsPlainText -Force;
+# Anmeldekonto definieren
+$DomAdmin =
+"gfnlab\administrator"
+# Abspeichern der Credentials vom Stamm-Domänenadmin (OrgAdmin)
+$DomAdminCred = New-Object $ObjectTypPSCredential ($DomAdmin, $AdminPwd)
+# 2.) Childdomain erstellen
+Install-ADDSDomain -SkipPreChecks `
+–DomainType ChildDomain `
+-ParentDomainName "gfnlab.test" `
+–NewDomainName “sub” `
+-credential $DomAdminCred `
+-SafeModeAdministratorPassword $dsrmPW
+
+
+Asugehen aus Domäne
+
+# Der Server wird aus der Domäne entfernt.
+# Klartext-Passwort verschlüsselt speichern
+$AdminPwd = ConvertTo-SecureString "Kennw0rt!" -AsPlainText -Force
+# Anmeldekonto definieren
+$DomAdmin =
+"gfnlab\administrator"
+# Definition des Objekttyps "PSCredential"
+$ObjectTypPSCredential =
+"System.Management.Automation.PSCredential"
+# Anmeldeinformationen erstellen (PSCredential-Objekt)
+$DomAdminCred = New-Object $ObjectTypPSCredential ($DomAdmin, $AdminPwd)
+# Computer aus der Domäne entfernen, Beitritt in Arbeitsgruppe "Workgroup"
+Remove-Computer -ComputerName "Server3" `
+-UnjoinDomainCredential $DomAdminCred `
+-WorkgroupName "WORKGROUP" `
+-Restart
+`
+-Force
+
+
+
+Neue Strukturdomäne
+
+# Installation der ADDS-Gesamtstruktur-Domäne auf Server3.
+# Festlegen des DSRM-Kennworts:
+$dsrmPW = ConvertTo-SecureString 'Pa55w.rd'
+-AsPlainText -Force
+# 1) Rolle installieren
+Install-WindowsFeature -Name AD-Domain-Services `
+-IncludeAllSubFeature `
+-IncludeManagementTools
+# 2) Gesamtstruktur erstellen
+$Args = @{
+DomainName =
+“it.pro”
+DomainNetbiosName = “it”
+Force = $true
+InstallDns = $true
+SafeModeAdministratorPassword = $dsrmPW
+SkipPreChecks = $true
+}
+Install-ADDSForest @Args
