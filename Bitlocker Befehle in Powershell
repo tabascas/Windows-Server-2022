@@ -29,7 +29,6 @@ Restart-Computer
 # Überprüfen, ob der Schutz wieder aktiv ist
 Get-BitLockerVolume -MountPoint "C:"
 
-
 Mit Kommandozeile (CMD)
 Hinweis: Mit dem Kommandozeilentool „Manage-BDE“ kann Bitlocker ebenfalls verwaltet werden.
 • Öffne die „CMD-Konsole“ als Administrator.
