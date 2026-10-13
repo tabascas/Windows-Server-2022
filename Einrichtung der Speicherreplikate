@@ -1,0 +1,165 @@
+# Erstellen der Disks mit Powershell
+New-VHD -Path H:\vm\Server2\srdata.vhdx -SizeBytes 100GB -Dynamic
+New-VHD -Path H:\vm\Server2\srlog.vhdx -SizeBytes 100GB -Dynamic
+New-VHD -Path H:\vm\Server3\srdata.vhdx -SizeBytes 100GB -Dynamic
+New-VHD -Path H:\vm\Server3\srlog.vhdx -SizeBytes 100GB -Dynamic
+# Einbinden der Festplatten (DataDist & LogDisk) in die VMs Server2 und Server3
+$dd2 = @{
+vmname =
+"server2"
+ControllerType="SCSI"
+Path="H:\vm\Server2\srdata.vhdx"
+}
+Add-VMHardDiskDrive @dd2
+$ld2 = @{
+vmname =
+"server2"
+ControllerType="SCSI"
+Path="H:\vm\Server2\srlog.vhdx"
+}
+Add-VMHardDiskDrive @ld2
+$dd3 = @{
+vmname = "server3"
+ControllerType="SCSI"
+Path="H:\vm\Server3\srdata.vhdx"
+}
+Add-VMHardDiskDrive @dd3
+$ld3 = @{
+vmname = "server3"
+ControllerType="SCSI"
+Path="H:\vm\Server3\srlog.vhdx"
+}
+Add-VMHardDiskDrive @ld3
+
+# Kopiere folgende Befehle in den Editor der ISE und führe das Skript mit der Funktionstaste „F5“
+oder dem „Play-Icon“ aus:
+
+
+# Alle physischen Platten identifizieren,
+# die für Pooling verfügbar sind (CanPool = $true)
+$physicalDisks = Get-PhysicalDisk |
+Where-Object { $_.CanPool -eq $true } |
+Select-Object -ExpandProperty UniqueId
+# Laufwerksbuchstaben und Labels definieren
+$driveMappings = @{
+1 = @{ Letter = 'S'; Label =
+'SR-DATA' }
+2 = @{ Letter = 'T'; Label = 'SR-LOG' }
+}
+$counter = 1
+foreach ($diskId in $physicalDisks) {
+# Disk initialisieren mit GPT-Partitionstyp
+Initialize-Disk -UniqueId $diskId -PartitionStyle GPT
+# Auswahl des Laufwerksbuchstabens und Labels passend zum Zähler
+switch ($counter) {
+1 {
+$letter = $driveMappings[1].Letter
+$label = $driveMappings[1].Label
+$counter = 2
+}
+2 {
+$letter = $driveMappings[2].Letter
+$label = $driveMappings[2].Label
+# Falls mehr als 2 Platten, ggf. Anpassungen nötig
+}
+default {
+Write-Warning "Mehr als zwei Platten — Logik erweitern."
+break
+}
+}
+# Neue Partition mit vollem Platz, Laufwerksbuchstaben zuweisen
+New-Partition -DiskId $diskId `
+-UseMaximumSize `
+-DriveLetter $letter
+# Volume formatieren mit NTFS und gewähltem Label / Beschriftung
+Format-Volume -DriveLetter $letter `
+-FileSystem NTFS
+`
+-NewFileSystemLabel $label
+}
+
+
+# Installation der Rolle und des Features
+
+# Installation der Rolle Dateiserver und des Features Speicherreplikat
+$param = @{
+name = "fs-fileserver”,”storage-replica"
+IncludeManagementTools = $true
+restart = $true
+}
+# Installation remote auf Server2
+Install-WindowsFeature @param -ComputerName Server2
+$Nachricht = "Remote-Installation auf Server2 ist abgeschlossen. "
+$Nachricht += "Lokale Installation wird gestartet. "
+$Nachricht += "Anschließend startet der Server3 neu!"
+Write-Host $Nachricht -ForegroundColor Yellow
+Read-Host "Drücke eine beliebige Taste um fortzufahren"
+# Installation lokal auf Server3
+Install-WindowsFeature @param
+
+# Einrichten eines Speicherreplikats (Server2 → Server3)
+$optionen = @{
+SourceComputerName =
+"server2"
+SourceVolumeName = "S:"
+SourceLogVolumeName = "T:"
+DestinationComputerName = "server3"
+DestinationVolumeName = "S:"
+DestinationLogVolumeName = "T:"
+SourceRGName = "SRG01"
+DestinationRGName = "DRG01"
+LogSizeInBytes = 64GB
+}
+New-SRPartnership @optionen
+
+
+
+# Replikationsrichtung umzukehren:
+# Replikationsinfos
+Get-SRGroup
+Write-Host "Achte auf Property 'IsPrimary'" -F Yellow
+Get-SRPartnership
+Write-Host "DestinationComputerName = Server3" -F Yellow
+Write-Host "Sie ändern nun die Replikationsrichtung" -f Yellow
+# Umdrehen der Replikationsrichtung
+Set-SRPartnership -NewSourceComputerName Server3 `
+-SourceRGName DRG01 `
+-DestinationComputerName Server2 `
+-DestinationRGName SRG01
+# Auslesen der neuen Eigenschaften
+$NeuesZiel = (Get-SRPartnership).DestinationComputerName
+$NeueQuelle = (Get-SRPartnership).SourceComputerName
+Write-Host "Neue Quelle = $NeueQuelle, Neues Ziel = $NeuesZiel"
+-f Cyan
+
+
+# die Storage-Replica aufzuheben:
+$args = @{
+SourceComputerName = "server3"
+DestinationComputerName = "server2"
+SourceRGName = "DRG01"
+DestinationRGName = "SRG01"
+confirm = $false
+}
+Remove-SRPartnership @args
+Remove-SRGroup -Name "SRG01"
+Remove-SRGroup -Name "DRG01"
+-ComputerName Server3
+Clear-SRMetadata -AllPartitions
+Clear-SRMetadata -AllLogs
+
+
+# Bestätige dreimal mit „Ja, alle“
+# Wechsle zu GFN-RLAB und öffne die Powershell-ISE als Administrator.
+# Öffne ein neues Skriptfenster in der ISE.
+# Führe folgendes Skript aus, um die virtuellen Datenträger zu löschen:
+
+for ($i=2;$i -le 3; $i++){
+# VHD/AVHD aus Einstellungen der VMs entfernen
+Get-VMHardDiskDrive -VMName server$i |
+where path -like "*sr*" |
+Remove-VMHardDiskDrive
+# Löschen der virtuellen Datentäger
+Get-Item -Path "H:\vm\Server$i\sr*" |
+Remove-Item
+}
