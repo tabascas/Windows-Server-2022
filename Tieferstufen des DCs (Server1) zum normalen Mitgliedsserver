@@ -1,0 +1,15 @@
+Test-ADDSDomainControllerUninstallation -LocalAdministratorPassword (ConvertTo-SecureString „Kennw0rt!“ -AsPlainText -Force)
+Uninstall-ADDSDomainController -LocalAdministratorPassword (ConvertTo-SecureString „Kennw0rt!“ -AsPlainText -Force)
+# Bestätige den Vorgang mit „Ja“
+
+Get-WindowsFeature | Where-Object {$PSItem.InstallState -eq „Installed“}
+# (Überprüfe, welche Rollen/Features auf dem Server1 installiert sind.)
+
+Uninstall-WindowsFeature -Name AD-Domain-Services, DNS
+# (Du deinstallierst ADDS und DNS.)
+
+Get-WindowsFeature | Where-Object {$PSItem.InstallState -eq „Installed“}
+# (Stelle fest, dass die Rollen ADDS und DNS nicht mehr auf dem Server1 installiert sind.)
+
+Restart-Computer
+# (Der nötige Neustart nach den Deinstallationen)
