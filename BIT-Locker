@@ -1,0 +1,22 @@
+# Anzeigen der Bitlocker Befehle in Powershell
+Get-Command -Module Bitlocker
+# Anzeigen der Bitlocker-Eigenschaft eines Laufwerks als Liste
+# Die Informationen zu den Protectors steht in geschweiften Klammern
+Get-BitLockerVolume -MountPoint "C:" | Format-List
+# Sollen vollständige Informationen der Protectors angezeigt werden,
+# müssen die Eigenschaft "ausgepackt" werden. Dies erreicht man mit dem
+# „Select-Object“ Befehl, der nur diese spezielle
+# Eigenschaften auswählt und dem Parameter "-expandproperty", welcher
+# für das "Auspacken" zuständig ist
+# Auslesen der einzelnen Keyprotector-Informationen.
+Get-BitLockerVolume -MountPoint "C:" |
+Select-Object -ExpandProperty keyprotector
+# Laden des Bitlocker-Volume-Objekts in die Variable $BLVolume.
+$BLVolume = Get-BitLockerVolume -MountPoint "C:"
+# Speichern des zweiten Bitlocker-Protectors
+# (Wiederherstellungskennwort) ins Active Directory
+# (Gruppenrichtlinie muss das zulassen!)
+# Die [1] steht für den zweiten Protector, mit [0] würde die PIN
+# als erster Protector ausgelesen werden.
+Backup-BitLockerKeyProtector -MountPoint "C:" -KeyProtectorId `
+$BLVolume.KeyProtector[1].KeyProtectorId
