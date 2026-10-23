@@ -20,3 +20,28 @@ $BLVolume = Get-BitLockerVolume -MountPoint "C:"
 # als erster Protector ausgelesen werden.
 Backup-BitLockerKeyProtector -MountPoint "C:" -KeyProtectorId `
 $BLVolume.KeyProtector[1].KeyProtectorId
+
+
+
+• Zum Ermitteln der möglichen Befehle tippe ein:
+manage-bde -?
+• Tippe folgenden Befehl ein, um den Schutzstatus zu ermitteln:
+manage-bde -status
+• Wenn du Folgendes eintippst, erhältst du eine Fehlerausgabe:
+manage-bde -protectors
+• Um die Syntax dieses Befehls zu ermitteln, tippe Folgendes ein. Dieses Verfahren kann
+immer angewendet werden, um die Syntax der Befehle zu erfahren:
+manage-bde -protectors -?
+• Zum Untersuchen der Protektoren tippe Folgendes ein:
+manage-bde -protectors -get C:
+• Bitlocker kann nicht mehr belegten Speicherplatz, der aber Datenreste enthält,
+bereinigen. Tippe folgenden Befehl ein:
+manage-bde -WipeFreeSpace C:
+• Die Bitlocker-Verschlüsselung kann mittels PowerShell und Kommandozeile deaktiviert
+werden.
+• Deaktiviere Bitlocker auf „W11“ und „Server2“
+.
+• Mit der CMD auf „W11“:
+manage-bde -off C:
+• Mit PowerShell auf „Server2“:
+Disable-BitLocker -MountPoint "c:" -Confirm:$false
